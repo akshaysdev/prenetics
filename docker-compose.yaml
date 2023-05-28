@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    container_name: server
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    depends_on:
+      - postgres_db
+      # mongo_db:
+      #   condition: service_started
+    command: bash -c 'while !</dev/tcp/postgres_db/5432; do sleep 1; done; npm start'
+
+  postgres_db:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    container_name: postgres_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+
+  # mongo_db:
+  #   image: mongo
+  #   container_name: mongo_db
+  #   ports:
+  #     - 27017:27017
+  #   command: --quiet --logpath /dev/null
+  #   healthcheck:
+  #     test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/healthcheck-database --quiet
+
+volumes:
+  node_modules:
