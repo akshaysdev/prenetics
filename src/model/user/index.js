@@ -3,12 +3,12 @@ const { UserSchema } = require('./schema');
 module.exports = class UserModel {
   constructor({ sequelize }) {
     UserSchema(sequelize);
-    this.repository = sequelize.models.User;
+    this.model = sequelize.models.User;
   }
 
   async create(userObject) {
     try {
-      const user = await this.repository.create(userObject);
+      const user = await this.model.create(userObject);
 
       return user;
     } catch (error) {
@@ -20,7 +20,7 @@ module.exports = class UserModel {
   async findByEmail(email) {
     try {
       const user = (
-        await this.repository.findAll({
+        await this.model.findAll({
           raw: true,
           where: {
             email,
@@ -39,7 +39,7 @@ module.exports = class UserModel {
   async findById(id) {
     try {
       const user = (
-        await this.repository.findAll({
+        await this.model.findAll({
           raw: true,
           where: {
             id,

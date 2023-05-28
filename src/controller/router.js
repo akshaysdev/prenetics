@@ -12,13 +12,13 @@ const router = (app) => {
 
   apiRoutes.use((req, res, next) => {
     if (!req.route) {
-      const error = createError(404, 'No route matched');
+      const error = createError(405, 'No route matched');
       return next(error);
     }
     return next();
   });
 
-  app.use('/api', apiRoutes);
+  app.use('/', apiRoutes);
 };
 
 module.exports = router;
