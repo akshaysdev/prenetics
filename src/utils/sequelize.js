@@ -19,7 +19,7 @@ sequelize.sync({});
 sequelize
   .authenticate()
   .then(() => {
-    console.log('Connection to the Database has been established successfully...');
+    console.log('Sequelize Database connected successfully');
   })
   .catch((error) => {
     console.error('Unable to connect to the database:', error);

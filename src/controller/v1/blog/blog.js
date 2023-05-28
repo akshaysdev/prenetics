@@ -44,7 +44,11 @@ module.exports = {
 
   readOwned: async (req, res) => {
     try {
-      const response = await blogService.readOwned(req.user.id);
+      const readerData = {
+        ...req.body,
+        userId: req.user.id,
+      };
+      const response = await blogService.readOwned(readerData);
 
       res.status(200).send({ success: true, ...response });
     } catch (error) {
@@ -54,7 +58,7 @@ module.exports = {
 
   readAll: async (req, res) => {
     try {
-      const response = await blogService.readAll();
+      const response = await blogService.readAll(req.body);
 
       res.status(200).send({ success: true, ...response });
     } catch (error) {

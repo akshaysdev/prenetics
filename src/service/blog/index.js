@@ -46,9 +46,9 @@ module.exports = class BlogService {
     try {
       const blog = await this.blogModel.update(blogId, updateObject);
 
-      //   if (!blog.modifiedCount) {
-      //     throw createError(304, 'Blog is not modified');
-      //   }
+      if (!blog) {
+        throw createError(304, 'Blog is not modified');
+      }
 
       return { blog, message: 'Blog is updated' };
     } catch (error) {
@@ -61,7 +61,7 @@ module.exports = class BlogService {
     try {
       const deleted = await this.blogModel.delete(blogId);
 
-      if (!deleted) {
+      if (!deleted.deletedCount) {
         throw createError(404, 'Blog doesnt exist / Failed to delete blog');
       }
 
@@ -76,6 +76,10 @@ module.exports = class BlogService {
     try {
       const blog = await this.blogModel.read(blogId);
 
+      if (!blog) {
+        throw createError(404, 'Failed to fetch blog');
+      }
+
       return { blog, message: 'Blog is fetched' };
     } catch (error) {
       error.meta = { ...error.meta, 'BlogService.read': { blogId } };
@@ -83,23 +87,24 @@ module.exports = class BlogService {
     }
   }
 
-  async readOwned(userId) {
+  async readOwned(readerData) {
     try {
-      const blogs = await this.blogModel.readOwned(userId);
+      const blogs = await this.blogModel.readOwned(readerData);
 
       return { blogs, message: 'Blogs owned are fetched' };
     } catch (error) {
-      error.meta = { ...error.meta, 'BlogService.readOwned': { userId } };
+      error.meta = { ...error.meta, 'BlogService.readOwned': { readerData } };
       throw error;
     }
   }
 
-  async readAll() {
+  async readAll(readerData) {
     try {
-      const blogs = await this.blogModel.readAll();
+      const blogs = await this.blogModel.readAll(readerData);
 
-      return { blogs, message: 'Exctracted all blogs' };
+      return { blogs, message: 'Fetched all blogs' };
     } catch (error) {
+      error.meta = { ...error.meta, 'BlogService.readAll': { readerData } };
       throw error;
     }
   }

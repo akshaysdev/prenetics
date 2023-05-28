@@ -1,11 +1,13 @@
 const { Lifetime, createContainer, asValue, asClass } = require('awilix');
 
 const { sequelize } = require('./sequelize');
+const { mongoDb } = require('./mongoDb');
 
 const Container = () => {
   const container = createContainer();
 
   container.register('sequelize', asValue(sequelize));
+  container.register('mongoDb', asValue(mongoDb));
 
   const options = {
     cwd: __dirname,

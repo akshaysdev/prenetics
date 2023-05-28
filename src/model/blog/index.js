@@ -1,10 +1,11 @@
-const { BlogSchema } = require('./schema');
+const createError = require('http-errors');
+
+const { fetchBlogsQuery } = require('./query');
+const BlogSchema = require('./schema');
 
 module.exports = class BlogModel {
   constructor({ mongoDb, sequelize }) {
-    // this.model = BlogSchema(mongoDb);
-    BlogSchema(sequelize);
-    this.model = sequelize.models.Blog;
+    this.model = BlogSchema(mongoDb);
   }
 
   async create(blogObject) {
@@ -12,6 +13,9 @@ module.exports = class BlogModel {
       const blog = await this.model.create(blogObject);
       return blog;
     } catch (error) {
+      if (error.code === 11000) {
+        throw createError(409, 'Title already exists', { meta: { blogObject } });
+      }
       error.meta = { ...error.meta, 'BlogModel.create': { blogObject } };
       throw error;
     }
@@ -19,17 +23,7 @@ module.exports = class BlogModel {
 
   async update(blogId, updateObject) {
     try {
-      const blog = (
-        await this.model.update(updateObject, {
-          returning: true,
-          plain: true,
-          raw: true,
-          where: {
-            id: blogId,
-          },
-        })
-      )[1];
-      console.log(`🚀 ~ file: index.js:32 ~ BlogModel ~ update ~ blog:`, blog)
+      const blog = await this.model.findByIdAndUpdate(blogId, updateObject, { new: true, lean: true });
 
       return blog;
     } catch (error) {
@@ -40,7 +34,7 @@ module.exports = class BlogModel {
 
   async delete(blogId) {
     try {
-      const deleted = await this.model.destroy({ where: { id: blogId } });
+      const deleted = await this.model.deleteOne({ _id: blogId });
 
       return deleted;
     } catch (error) {
@@ -51,8 +45,7 @@ module.exports = class BlogModel {
 
   async read(blogId) {
     try {
-      const blog = await this.model.findByPk(blogId);
-      console.log(`🚀 ~ file: index.js:51 ~ BlogModel ~ read ~ blog:`, blog);
+      const blog = await this.model.findById(blogId);
 
       return blog;
     } catch (error) {
@@ -61,29 +54,28 @@ module.exports = class BlogModel {
     }
   }
 
-  async readOwned(userId) {
+  async readOwned({ userId, pageNumber, limit }) {
     try {
-      const blogs = await this.model.findAll({
-        where: {
-          authorId: userId,
-        },
-      });
-      console.log(`🚀 ~ file: index.js:67 ~ BlogModel ~ readOwned ~ blogs:`, blogs);
+      const query = fetchBlogsQuery({ userId, pageNumber, limit });
+
+      const blogs = await this.model.aggregate(query).allowDiskUse(true).exec();
 
       return blogs;
     } catch (error) {
-      error.meta = { ...error.meta, 'BlogModel.readOwned': { userId } };
+      error.meta = { ...error.meta, 'BlogModel.readOwned': { userId, pageNumber, limit } };
       throw error;
     }
   }
 
-  async readAll() {
+  async readAll({ pageNumber, limit }) {
     try {
-      const blogs = await this.model.findAll();
-      console.log(`🚀 ~ file: index.js:79 ~ BlogModel ~ readAll ~ blogs:`, blogs);
+      const query = fetchBlogsQuery({ pageNumber, limit });
+
+      const blogs = await this.model.aggregate(query).allowDiskUse(true).exec();
 
       return blogs;
     } catch (error) {
+      error.meta = { ...error.meta, 'BlogModel.readAll': { pageNumber, limit } };
       throw error;
     }
   }
