@@ -17,25 +17,6 @@ module.exports = class UserModel {
     }
   }
 
-  async findById(userId) {
-    try {
-      const user = (
-        await this.repository.findAll({
-          raw: true,
-          where: {
-            id: userId,
-          },
-          attributes: ['id', 'email'],
-        })
-      )[0];
-
-      return user;
-    } catch (error) {
-      error.meta = { ...error.meta, 'UserModel.findById': { userId } };
-      throw error;
-    }
-  }
-
   async findByEmail(email) {
     try {
       const user = (
@@ -44,13 +25,32 @@ module.exports = class UserModel {
           where: {
             email,
           },
-          attributes: ['id', 'email', 'password'],
+          attributes: ['id', 'email', 'username', 'password'],
         })
       )[0];
 
       return user;
     } catch (error) {
       error.meta = { ...error.meta, 'UserModel.findByEmail': { email } };
+      throw error;
+    }
+  }
+
+  async findById(id) {
+    try {
+      const user = (
+        await this.repository.findAll({
+          raw: true,
+          where: {
+            id,
+          },
+          attributes: ['id', 'username'],
+        })
+      )[0];
+
+      return user;
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserModel.findById': { id } };
       throw error;
     }
   }

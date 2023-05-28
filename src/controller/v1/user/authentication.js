@@ -7,9 +7,18 @@ const register = async (req, res) => {
 
     res.status(200).send({ success: true, message: response.message });
   } catch (error) {
-    console.log(`🚀 ~ file: authentication.js:10 ~ register ~ error:`, error)
     res.status(error.status || 500).send(response(error));
   }
 };
 
-module.exports = { register };
+const login = async (req, res) => {
+  try {
+    const response = await userService.login(req.body);
+
+    res.status(200).send({ success: true, ...response });
+  } catch (error) {
+    res.status(error.status || 500).send(response(error));
+  }
+};
+
+module.exports = { register, login };

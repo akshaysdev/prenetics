@@ -1,4 +1,5 @@
 const createError = require('http-errors');
+const jwt = require('jsonwebtoken');
 
 const { validateEmail, validatePassword, hashPassword } = require('../../helpers/user');
 
@@ -7,7 +8,7 @@ module.exports = class UserService {
     this.userModel = userModel;
   }
 
-  async validate({ username, email, password }) {
+  async validateRegistration({ username, email, password }) {
     try {
       if (!username) {
         throw createError(422, 'Name is required');
@@ -38,7 +39,7 @@ module.exports = class UserService {
 
   async register(userObject) {
     try {
-      await this.validate(userObject);
+      await this.validateRegistration(userObject);
 
       userObject.password = hashPassword(userObject.password);
 
@@ -47,6 +48,55 @@ module.exports = class UserService {
       return { message: 'Registered Successfully!' };
     } catch (error) {
       error.meta = { ...error.meta, 'UserService.register': { userObject } };
+      throw error;
+    }
+  }
+
+  async validateLogin({ email, password }) {
+    try {
+      if (!email || !password) {
+        throw createError(422, 'Both email and password is required');
+      }
+
+      const userCred = await this.userModel.findByEmail(email);
+      if (!userCred) {
+        throw createError(422, 'User does not exist');
+      }
+
+      return userCred;
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserService.validateLogin': { email, password } };
+      throw error;
+    }
+  }
+
+  async login(userObject) {
+    try {
+      const userCreds = await this.validateLogin(userObject);
+
+      const password = hashPassword(userObject.password);
+
+      if (password !== userCreds.password) {
+        throw createError(422, 'Incorrect email/password');
+      }
+
+      const token = jwt.sign({ username: userCreds.username, id: userCreds.id }, process.env.JWT_SECRET, {
+        expiresIn: '1d',
+      });
+
+      return { message: 'Logged-In Successfully!', token: `Bearer ${token}` };
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserService.login': { userObject } };
+      throw error;
+    }
+  }
+
+  async findById(userId) {
+    try {
+      const user = await this.userModel.findById(userId);
+      return user;
+    } catch (error) {
+      error.meta = { ...error.meta, 'UserService.findById': { userId } };
       throw error;
     }
   }

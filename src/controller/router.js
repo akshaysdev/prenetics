@@ -1,6 +1,8 @@
 const createError = require('http-errors');
 const express = require('express');
 
+require('../utils/passportJwt');
+
 const v1Routes = require('./v1/v1Routes');
 
 const router = (app) => {
