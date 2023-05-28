@@ -36,8 +36,11 @@ npm start
 ```
 
 ### You can run all the services together
+
 #### Install docker and then,
 
 ```bash
 docker compose up
 ```
+
+[Link to Postman](https://www.postman.com/akshaysdev/workspace/prenetics)
