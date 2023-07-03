@@ -16,17 +16,17 @@ npm install
 
 ```.env
 PORT=8080
-JWT_SECRET=prenetics-jwt-secret
-SALT_PASSWORD=prenetics-salt
+JWT_SECRET=blogs-jwt-secret
+SALT_PASSWORD=blogs-salt
 
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=admin
 POSTGRES_HOST=localhost
-POSTGRES_DATABASE=prenetics
+POSTGRES_DATABASE=blogs
 POSTGRES_PORT=5432
 
 MONGODB_URI=mongodb://localhost:27107
-MONGODB_NAME=prenetics
+MONGODB_NAME=blogs
 ```
 
 ### Start the node server
@@ -43,4 +43,4 @@ npm start
 docker compose up
 ```
 
-[Link to Postman](https://www.postman.com/akshaysdev/workspace/prenetics)
+[Link to Postman](https://www.postman.com/akshaysdev/workspace/blogs)

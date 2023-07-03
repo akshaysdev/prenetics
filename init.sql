@@ -1,1 +1,1 @@
-CREATE DATABASE prenetics;
+CREATE DATABASE blogs;
